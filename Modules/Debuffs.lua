@@ -4,12 +4,6 @@ local locaDebuffs = addon.CreateDebuffs()
 local container
 local isLocked = true
 
--- weights - 1 - MOVEMENT, 2 - SILENCE/DISARM, 3 - FULL
-local debuffsTable = {
-  { spellId = 11196, category = "Bandage", weight = 2 },
-  { spellId = 41425, category = "Frozen", weight = 3 },
-}
-
 locaDebuffs.options = {
   type = "group",
   name = "Debuffs",
@@ -55,6 +49,13 @@ locaDebuffs.options = {
       get = function(info) return locaDebuffs:GetAlpha(info) end,
       set = function(info, val) locaDebuffs:SetAlpha(info, val) end
     },
+    debuffList = {
+      order = 5,
+      type = "group",
+      name = "Tracked debuffs",
+      childGroups = "select",
+      args = {},
+    }
   }
 }
 
@@ -74,7 +75,7 @@ function locaDebuffs:OnDebuffsChanged()
     local debuffIcon = icons[name]
 
     -- check if the debuff is being monitored for alerts
-    if debuffIcon then
+    if debuffIcon and debuffIcon.active then
       table.insert(candidatesForActivation, debuffIcon)
       table.insert(candidateDurations, durationLeft)
     end
@@ -213,6 +214,8 @@ function locaDebuffs:OnInitialize(db)
   end
 
   iconFrame = locaDebuffs:CreateIcon()
+
+  locaDebuffs.options.args.debuffList.args = locaDebuffs:CreateDebuffUIList()
 
   locaDebuffs:OnUpdateSettings()
 end
@@ -405,9 +408,68 @@ function locaDebuffs:SetAlpha(info, val)
 end
 
 function locaDebuffs:OnUpdateSettings()
-  locaDebuffs:DeactivateDebuff()
-
   locaDebuffs:LoadPosition()
 
   locaDebuffs:UpdateContainer()
+end
+
+function locaDebuffs:CreateDebuffUIList()
+  local debuffListArgs = { }
+  local orderNumber = 1
+
+  for _, debuff in ipairs(locaDebuffs.db.debuffsTable) do
+    debuffUI = {
+      order = orderNumber,
+      type = "toggle",
+      name = debuff.name,
+      image = debuff.icon,
+      width = "full",
+      get = function(info) return debuff.active end,
+      set = function(info, val) debuff.active = val end
+    }
+
+    debuffUI = {
+      order = orderNumber,
+      type = "group",
+      name = debuff.name,
+      icon = debuff.icon,
+      childGroups = "select",
+      inline = true,
+      args = {
+        icon = {
+          order = 1,
+          type = "description",
+          name = debuff.category,
+          image = debuff.icon,
+        },
+        enable = {
+          order = 2,
+          type = "toggle",
+          name = "Enabled",
+          get = function(info) return debuff.active end,
+          set = function(info, val) debuff.active = val end,
+        },
+        weight = {
+          order = 3,
+          type = "select",
+          name = "Weight",
+          desc = "Higher weighted alerts overwrite lower ones",
+          values = {
+            [1] = "1 - Movement",
+            [2] = "2 - Disarm/Silence",
+            [3] = "3 - Stun",
+            [4] = "4 - Full",
+          },
+          get = function(info) return debuff.weight end,
+          set = function(info, val) debuff.weight = val end
+        }
+      }
+    }
+
+    orderNumber = orderNumber + 1
+
+    debuffListArgs[debuff.name] = debuffUI
+  end
+
+  return debuffListArgs
 end

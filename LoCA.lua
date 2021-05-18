@@ -49,9 +49,6 @@ addon.defaultSettings = {
         { spellId = 14309, category = "Frozen", weight = 4, active = true },        --[[ Freezing Trap --]]
 
         { spellId = 11196, category = "Bandaged", weight = 2, active = true },        --[[ Freezing Trap --]]
-
-        { spellId = 27126, category = "Bandaged", weight = 4, active = true },        --[[ Freezing Trap --]]
-        --{ spellId = 41425, category = "Hypo", weight = 4, active = true },        --[[ Freezing Trap --]]
       }
     }
   }
@@ -98,16 +95,22 @@ function addon:OnUpdateSettings()
     addon.eventHandler:RegisterEvent("LOSS_OF_CONTROL_ADDED")
     addon.eventHandler:RegisterEvent("LOSS_OF_CONTROL_UPDATE")
     addon.eventHandler:UnregisterEvent("UNIT_AURA")
+
+    local data = C_LossOfControl.GetActiveLossOfControlData(1)
+    debuffs:OnLossOfControlUpdate(data)
   else
     addon.eventHandler:UnregisterEvent("LOSS_OF_CONTROL_ADDED")
     addon.eventHandler:UnregisterEvent("LOSS_OF_CONTROL_UPDATE")
     addon.eventHandler:RegisterEvent("UNIT_AURA")
+
+    addon:OnAuraEvent("player")
   end
 
   debuffs:OnUpdateSettings()
 end
 
 function addon:OnInitialize()
+  addon.eventHandler:RegisterEvent("PLAYER_ENTERING_WORLD")
 
   addon.db = LibStub("AceDB-3.0"):New(addonName .. "DB", addon.defaultSettings, true)
   addon.options.args.profile = LibStub("AceDBOptions-3.0"):GetOptionsTable(addon.db)
@@ -123,16 +126,13 @@ function addon:OnInitialize()
 
   local function UpdateProfileRefs()
     debuffs.db = addon.db.profile["debuffs"]
-  end
 
-  local function OnProfileChange()
-    UpdateProfileRefs()
     addon:OnUpdateSettings()
   end
 
-  addon.db.RegisterCallback(addon, "OnProfileChanged", OnProfileChange)
-  addon.db.RegisterCallback(addon, "OnProfileCopied", OnProfileChange)
-  addon.db.RegisterCallback(addon, "OnProfileReset", OnProfileChange)
+  addon.db.RegisterCallback(addon, "OnProfileChanged", UpdateProfileRefs)
+  addon.db.RegisterCallback(addon, "OnProfileCopied", UpdateProfileRefs)
+  addon.db.RegisterCallback(addon, "OnProfileReset", UpdateProfileRefs)
 
   print("Initialized " .. addon.addonTitle)
 end
@@ -153,6 +153,8 @@ function addon:OnEvent(event, ...)
       local data = C_LossOfControl.GetActiveLossOfControlData(1)
       debuffs:OnLossOfControlUpdate(data)
     end
+  elseif event == "PLAYER_ENTERING_WORLD" then
+    addon:OnUpdateSettings()
   end
 end
 

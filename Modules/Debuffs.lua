@@ -59,7 +59,6 @@ function locaDebuffs:OnDebuffsChanged()
     if not name then break end
 
     local durationLeft = expirationTime - GetTime()
-    -- print(i .. "=" .. name .. "(" .. spellId .. ") - " .. durationLeft)
 
     local debuffIcon = icons[name]
 
@@ -92,6 +91,53 @@ function locaDebuffs:OnDebuffsChanged()
 
   locaDebuffs:ActivateNewDebuff(candidatesForActivation[targetIndex], candidateDurations[targetIndex])
 
+end
+
+function locaDebuffs:OnLossOfControlEvent(locData, eventIndex)
+  local locType = locData.locType;
+  local spellID = locData.spellID;
+  local text = locData.displayText;
+  local iconTexture = locData.iconTexture;
+  local startTime = locData.startTime;
+  local timeRemaining = locData.timeRemaining;
+  local duration = locData.duration;
+  local lockoutSchool = locData.lockoutSchool;
+  local priority = locData.priority;
+  local displayType = locData.displayType;
+
+  if ( text and displayType ~= 0 ) then
+    if ( locType == "SCHOOL_INTERRUPT" ) then
+      if(lockoutSchool and lockoutSchool ~= 0) then
+        text = string.format("%s Locked", GetSchoolString(lockoutSchool));
+      end
+    end
+    
+    -- make a fake debuff configuration object
+    local debuffConfiguration = {
+      spellId = spellID,
+      name = text,
+      icon = iconTexture,
+      weight = priority,
+      category = text
+    }
+
+    if not iconFrame.active or debuffConfiguration.weight > iconFrame.weight then
+      locaDebuffs:ActivateNewDebuff(debuffConfiguration, timeRemaining)
+    elseif iconFrame.active and debuffConfiguration.weight == iconFrame.weight and timeRemaining > iconFrame.timeLeft then
+      locaDebuffs:ActivateNewDebuff(debuffConfiguration, timeRemaining)
+    end
+  end
+end
+
+function locaDebuffs:OnLossOfControlUpdate(locData)
+  if locData and locData.displayType ~= 0 then
+    if iconFrame.active and locData.spellID ~= iconFrame.spellId then
+      locaDebuffs:DeactivateDebuff()
+    end
+    locaDebuffs:OnLossOfControlEvent(locData)
+  else
+    locaDebuffs:DeactivateDebuff()
+  end
 end
 
 function locaDebuffs:LoadPosition()
@@ -156,9 +202,7 @@ function locaDebuffs:OnInitialize(db)
 
   iconFrame = locaDebuffs:CreateIcon()
 
-  locaDebuffs:LoadPosition()
-
-  locaDebuffs:UpdateContainer()
+  locaDebuffs:OnUpdateSettings()
 end
 
 function locaDebuffs:CreateIcon(debuff)
@@ -219,6 +263,11 @@ function locaDebuffs:CreateIcon(debuff)
   btn.redLineTop = redLineTop
   btn.debuffTitle = debuffTitle
 
+  btn.spellId = 0
+  btn.name = ""
+  btn.weight = 0
+  btn.duration = 0
+
   btn.activate = function(debuff, timeLeft)
     if btn.active then return end
     
@@ -252,6 +301,8 @@ function locaDebuffs:CreateIcon(debuff)
   end
 
   btn.settimeleft = function(timeleft)
+    btn.timeLeft = timeleft
+
     if timeleft < 10 then
       if timeleft <= 0.5 then
         btn.text:SetText("")
@@ -277,21 +328,21 @@ function locaDebuffs:CreateIcon(debuff)
   return btn
 end
 
-function locaDebuffs:ActivateNewDebuff(debuffIcon, durationLeft)
-  if not debuffIcon then
+function locaDebuffs:ActivateNewDebuff(newDebuff, durationLeft)
+  if not newDebuff then
     locaDebuffs:DeactivateDebuff()
     return
   end
 
   if iconFrame.active then
-    if iconFrame.spellId == debuffIcon.spellId then
+    if iconFrame.spellId == newDebuff.spellId then
       -- TODO: do we need to update the time left?
       return
     end
     locaDebuffs:DeactivateDebuff()
   end
 
-  iconFrame.activate(debuffIcon, durationLeft)
+  iconFrame.activate(newDebuff, durationLeft)
 end
 
 function locaDebuffs:DeactivateDebuff()
@@ -329,5 +380,13 @@ end
 
 function locaDebuffs:SetScale(info, val)
   locaDebuffs.db.scale = val
+  locaDebuffs:UpdateContainer()
+end
+
+function locaDebuffs:OnUpdateSettings()
+  locaDebuffs:DeactivateDebuff()
+  
+  locaDebuffs:LoadPosition()
+
   locaDebuffs:UpdateContainer()
 end

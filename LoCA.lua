@@ -4,6 +4,7 @@ addon.addonTitle = GetAddOnMetadata(addonName, "Title")
 addon.defaultSettings = {
   profile = {
     setting = true,
+    mode = "retail", --[[ custom/retail --]]
     debuffs = {
       scale = 1,
       debuffsTable = {
@@ -45,8 +46,11 @@ addon.defaultSettings = {
         { spellId = 33786, category = "Cycloned", weight = 4, active = true },      --[[ Cyclone --]]
         { spellId = 11297, category = "Sapped", weight = 4, active = true },        --[[ Sap --]]
         { spellId = 14309, category = "Frozen", weight = 4, active = true },        --[[ Freezing Trap --]]
-        { spellId = 11196, category = "Bandaged", weight = 4, active = true },        --[[ Freezing Trap --]]
-        { spellId = 41425, category = "Hypo", weight = 4, active = true },        --[[ Freezing Trap --]]
+
+        { spellId = 11196, category = "Bandaged", weight = 2, active = true },        --[[ Freezing Trap --]]
+
+        { spellId = 27126, category = "Bandaged", weight = 4, active = true },        --[[ Freezing Trap --]]
+        --{ spellId = 41425, category = "Hypo", weight = 4, active = true },        --[[ Freezing Trap --]]
       }
     }
   }
@@ -63,15 +67,44 @@ addon.options = {
       fontSize = 'large',
       name = addon.addonTitle .. " " .. GetAddOnMetadata(addonName, "Version")
     },
+    mode = {
+      order = 3,
+      name = "Mode",
+      type = "select",
+      style = "dropdown",
+      values = {
+        retail = "Retail",
+        custom = "Custom"
+      },
+      get = function(info) return addon.db.profile.mode end,
+      set = function(info, val)
+        addon.db.profile.mode = val
+        addon:OnUpdateSettings()
+      end,
+    },
     break1 = {
       order = 2,
       type = "header",
       name = ""
-    }
+    },
   },
 }
 
 addon.debuffs = {}
+
+function addon:OnUpdateSettings()
+  if addon.db.profile.mode == "retail" then
+    addon.eventHandler:RegisterEvent("LOSS_OF_CONTROL_ADDED")
+    addon.eventHandler:RegisterEvent("LOSS_OF_CONTROL_UPDATE")
+    addon.eventHandler:UnregisterEvent("UNIT_AURA")
+  else
+    addon.eventHandler:UnregisterEvent("LOSS_OF_CONTROL_ADDED")
+    addon.eventHandler:UnregisterEvent("LOSS_OF_CONTROL_UPDATE")
+    addon.eventHandler:RegisterEvent("UNIT_AURA")
+  end
+
+  debuffs:OnUpdateSettings()
+end
 
 function addon:OnInitialize()
 
@@ -85,6 +118,21 @@ function addon:OnInitialize()
   LibStub("AceConfig-3.0"):RegisterOptionsTable(addonName, addon.options)
   LibStub("AceConfigDialog-3.0"):AddToBlizOptions(addonName, addon.addonTitle)
 
+  addon:OnUpdateSettings();
+
+  local function UpdateProfileRefs()
+    debuffs.db = addon.db.profile["debuffs"]
+  end
+
+  local function OnProfileChange()
+    UpdateProfileRefs()
+    addon:OnUpdateSettings()
+  end
+
+  addon.db.RegisterCallback(addon, "OnProfileChanged", OnProfileChange)
+  addon.db.RegisterCallback(addon, "OnProfileCopied", OnProfileChange)
+  addon.db.RegisterCallback(addon, "OnProfileReset", OnProfileChange)
+
   print("Initialized " .. addon.addonTitle)
 end
 
@@ -94,13 +142,22 @@ function addon:OnEvent(event, ...)
   elseif event == "UNIT_AURA" then
     addon:OnAuraEvent(...)
   elseif event == "LOSS_OF_CONTROL_ADDED" then
-    -- TODO: Consider using this event
+    if addon.db.profile.mode == "retail" then
+      local eventIndex = ...
+      local data = C_LossOfControl.GetActiveLossOfControlData(eventIndex)
+      debuffs:OnLossOfControlEvent(data, eventIndex)
+    end
+  elseif event == "LOSS_OF_CONTROL_UPDATE" then
+    if addon.db.profile.mode == "retail" then
+      local data = C_LossOfControl.GetActiveLossOfControlData(1)
+      debuffs:OnLossOfControlUpdate(data)
+    end
   end
 end
 
 function addon:OnAuraEvent(unitId)
   -- we are only interested in our debuffs
-  if unitId ~= "player" then
+  if unitId ~= "player" or addon.db.profile.mode ~= "custom" then
     return
   end
 
@@ -110,8 +167,6 @@ end
 addon.eventHandler = CreateFrame("Frame")
 addon.eventHandler:SetScript("OnEvent", addon.OnEvent)
 addon.eventHandler:RegisterEvent("ADDON_LOADED")
-addon.eventHandler:RegisterEvent("UNIT_AURA")
-addon.eventHandler:RegisterEvent("LOSS_OF_CONTROL_ADDED")
 
 function addon:CreateDebuffs()
   debuffs = {

@@ -43,7 +43,18 @@ locaDebuffs.options = {
       bigStep = 0.1,
       get = function(info) return locaDebuffs:GetScale(info) end,
       set = function(info, val) locaDebuffs:SetScale(info, val) end
-    }
+    },
+    alpha = {
+      order = 4,
+      name = "Alpha",
+      type = "range",
+      min = 0.1,
+      max = 1,
+      step = 0.1,
+      bigStep = 0.1,
+      get = function(info) return locaDebuffs:GetAlpha(info) end,
+      set = function(info, val) locaDebuffs:SetAlpha(info, val) end
+    },
   }
 }
 
@@ -184,6 +195,7 @@ end
 
 function locaDebuffs:UpdateContainer()
   container:SetScale(locaDebuffs.db.scale)
+  container:SetAlpha(locaDebuffs.db.alpha)
 end
 
 function locaDebuffs:OnInitialize(db)
@@ -383,9 +395,18 @@ function locaDebuffs:SetScale(info, val)
   locaDebuffs:UpdateContainer()
 end
 
+function locaDebuffs:GetAlpha(info)
+  return locaDebuffs.db.alpha
+end
+
+function locaDebuffs:SetAlpha(info, val)
+  locaDebuffs.db.alpha = val
+  locaDebuffs:UpdateContainer()
+end
+
 function locaDebuffs:OnUpdateSettings()
   locaDebuffs:DeactivateDebuff()
-  
+
   locaDebuffs:LoadPosition()
 
   locaDebuffs:UpdateContainer()

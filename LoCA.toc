@@ -1,0 +1,12 @@
+## Interface: 20501
+## Title: Loss of Control Alerter
+## Notes: Shows alerts on loss of control debuffs
+## Version: 0.1-alpha
+## Author: Rdmx
+## DefaultState: Enabled
+## SavedVariables: LoCADB
+
+embeds.xml
+
+LoCA.lua
+Modules\Debuffs.lua

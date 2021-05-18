@@ -118,7 +118,7 @@ end
 function locaDebuffs:CreateContainerFrame()
   container = CreateFrame("Frame", nil, UIParent, BackdropTemplateMixin and "BackdropTemplate")
   container:SetMovable(false)
-  container:SetWidth(140)
+  container:SetWidth(160)
   container:SetBackdrop({
     --bgFile = "Interface/Tooltips/UI-Tooltip-Background",
     edgeFile = "Interface/Tooltips/UI-Tooltip-Border",
@@ -174,21 +174,30 @@ function locaDebuffs:CreateIcon(debuff)
   cd:SetAllPoints(true)
   cd:SetFrameStrata("HIGH")
   cd:SetUseCircularEdge(true)
+  cd:SetSwipeColor(0.17, 0, 0, 0.8)
+  cd:SetEdgeTexture("Interface\\Cooldown\\edge-LoC.blp")
   cd:SetHideCountdownNumbers(true)
   --cd:Hide()
 
-  local texture = btn:CreateTexture(nil, "BACKGROUND")
+  local texture = btn:CreateTexture(nil, "ARTWORK")
   texture:SetAllPoints(true)
+
+  local backgroundTexture = btn:CreateTexture(nil, "BACKGROUND")
+  backgroundTexture:SetTexture("Interface\\Cooldown\\LoC-ShadowBG")
+  backgroundTexture:SetPoint("BOTTOM", container, "BOTTOM", 0, 0)
+  backgroundTexture:SetWidth(160)
+  backgroundTexture:SetHeight(50)
+  backgroundTexture:SetVertexColor(1, 1, 1, 0.6)
 
   local redLineTop = btn:CreateTexture(nil, "BACKGROUND")
   redLineTop:SetTexture("Interface\\Cooldown\\Loc-RedLine")
-  redLineTop:SetWidth(140)
+  redLineTop:SetWidth(160)
   redLineTop:SetHeight(27)
   redLineTop:SetPoint("BOTTOM", container, "TOP", 0, 0)
 
   local redLineBottom = btn:CreateTexture(nil, "BACKGROUND")
   redLineBottom:SetTexture("Interface\\Cooldown\\Loc-RedLine")
-  redLineBottom:SetWidth(140)
+  redLineBottom:SetWidth(160)
   redLineBottom:SetHeight(20)
   redLineBottom:SetTexCoord(0, 1, 1, 0)
   redLineBottom:SetPoint("TOP", container, "BOTTOM", 0, 0)

@@ -4,8 +4,8 @@ addon.addonTitle = GetAddOnMetadata(addonName, "Title")
 addon.defaultSettings = {
   profile = {
     setting = true,
-    mode = "retail", --[[ custom/retail --]]
     debuffs = {
+      mode = "retail", --[[ custom/retail --]]
       scale = 1,
       alpha = 1,
       debuffsTable = {
@@ -49,6 +49,7 @@ addon.defaultSettings = {
         { spellId = 14309, category = "Frozen", weight = 4, active = true },        --[[ Freezing Trap --]]
 
         { spellId = 11196, category = "Bandaged", weight = 2, active = true },        --[[ Freezing Trap --]]
+        { spellId = 41425, category = "Hypo", weight = 2, active = true },        --[[ Freezing Trap --]]
       }
     }
   }
@@ -62,8 +63,9 @@ addon.options = {
     title = {
       order = 1,
       type = 'description',
-      fontSize = 'large',
-      name = addon.addonTitle .. " " .. GetAddOnMetadata(addonName, "Version")
+      name = [[The alerts can operate in two modes:
+      - Retail - The alert logic is very close to the standard blizzard alerts.
+      - Custom - This allows you to configure which debuffs you want to alert and with what priority.]],
     },
     mode = {
       order = 3,
@@ -74,9 +76,9 @@ addon.options = {
         retail = "Retail",
         custom = "Custom"
       },
-      get = function(info) return addon.db.profile.mode end,
+      get = function(info) return addon.db.profile.debuffs.mode end,
       set = function(info, val)
-        addon.db.profile.mode = val
+        addon.db.profile.debuffs.mode = val
         addon:OnUpdateSettings()
       end,
     },
@@ -91,7 +93,7 @@ addon.options = {
 addon.debuffs = {}
 
 function addon:OnUpdateSettings()
-  if addon.db.profile.mode == "retail" then
+  if addon.db.profile.debuffs.mode == "retail" then
     addon.eventHandler:RegisterEvent("LOSS_OF_CONTROL_ADDED")
     addon.eventHandler:RegisterEvent("LOSS_OF_CONTROL_UPDATE")
     addon.eventHandler:UnregisterEvent("UNIT_AURA")
@@ -143,13 +145,13 @@ function addon:OnEvent(event, ...)
   elseif event == "UNIT_AURA" then
     addon:OnAuraEvent(...)
   elseif event == "LOSS_OF_CONTROL_ADDED" then
-    if addon.db.profile.mode == "retail" then
+    if addon.db.profile.debuffs.mode == "retail" then
       local eventIndex = ...
       local data = C_LossOfControl.GetActiveLossOfControlData(eventIndex)
       debuffs:OnLossOfControlEvent(data, eventIndex)
     end
   elseif event == "LOSS_OF_CONTROL_UPDATE" then
-    if addon.db.profile.mode == "retail" then
+    if addon.db.profile.debuffs.mode == "retail" then
       local data = C_LossOfControl.GetActiveLossOfControlData(1)
       debuffs:OnLossOfControlUpdate(data)
     end
@@ -160,7 +162,7 @@ end
 
 function addon:OnAuraEvent(unitId)
   -- we are only interested in our debuffs
-  if unitId ~= "player" or addon.db.profile.mode ~= "custom" then
+  if unitId ~= "player" or addon.db.profile.debuffs.mode ~= "custom" then
     return
   end
 
@@ -173,6 +175,9 @@ addon.eventHandler:RegisterEvent("ADDON_LOADED")
 
 function addon:CreateDebuffs()
   debuffs = {
+    NotifyUpdate = function()
+      addon:OnUpdateSettings()
+    end
   }
 
   return debuffs

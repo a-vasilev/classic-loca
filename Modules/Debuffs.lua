@@ -54,6 +54,8 @@ locaDebuffs.options = {
       type = "group",
       name = "Tracked debuffs",
       childGroups = "select",
+      hidden = function() return locaDebuffs.db.mode ~= "custom" end,
+      disabled = function() return locaDebuffs.db.mode ~= "custom" end,
       args = {},
     }
   }
@@ -420,16 +422,6 @@ function locaDebuffs:CreateDebuffUIList()
   for _, debuff in ipairs(locaDebuffs.db.debuffsTable) do
     debuffUI = {
       order = orderNumber,
-      type = "toggle",
-      name = debuff.name,
-      image = debuff.icon,
-      width = "full",
-      get = function(info) return debuff.active end,
-      set = function(info, val) debuff.active = val end
-    }
-
-    debuffUI = {
-      order = orderNumber,
       type = "group",
       name = debuff.name,
       icon = debuff.icon,
@@ -447,7 +439,7 @@ function locaDebuffs:CreateDebuffUIList()
           type = "toggle",
           name = "Enabled",
           get = function(info) return debuff.active end,
-          set = function(info, val) debuff.active = val end,
+          set = function(info, val) debuff.active = val locaDebuffs:NotifyUpdate() end,
         },
         weight = {
           order = 3,
@@ -461,7 +453,7 @@ function locaDebuffs:CreateDebuffUIList()
             [4] = "4 - Full",
           },
           get = function(info) return debuff.weight end,
-          set = function(info, val) debuff.weight = val end
+          set = function(info, val) debuff.weight = val; locaDebuffs:NotifyUpdate() end
         }
       }
     }

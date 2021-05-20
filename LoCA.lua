@@ -47,9 +47,6 @@ addon.defaultSettings = {
         { spellId = 33786, category = "Cycloned", weight = 4, active = true },      --[[ Cyclone --]]
         { spellId = 11297, category = "Sapped", weight = 4, active = true },        --[[ Sap --]]
         { spellId = 14309, category = "Frozen", weight = 4, active = true },        --[[ Freezing Trap --]]
-
-        { spellId = 11196, category = "Bandaged", weight = 2, active = true },        --[[ Freezing Trap --]]
-        { spellId = 41425, category = "Hypo", weight = 2, active = true },        --[[ Freezing Trap --]]
       }
     }
   }

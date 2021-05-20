@@ -61,7 +61,7 @@ locaDebuffs.options = {
   }
 }
 
-local icons = {}
+local initializedDebuffs = {}
 local iconFrame
 
 function locaDebuffs:OnDebuffsChanged()
@@ -74,7 +74,7 @@ function locaDebuffs:OnDebuffsChanged()
 
     local durationLeft = expirationTime - GetTime()
 
-    local debuffIcon = icons[name]
+    local debuffIcon = initializedDebuffs[name]
 
     -- check if the debuff is being monitored for alerts
     if debuffIcon and debuffIcon.active then
@@ -180,12 +180,10 @@ function locaDebuffs:CreateContainerFrame()
   container:SetMovable(false)
   container:SetWidth(160)
   container:SetBackdrop({
-    --bgFile = "Interface/Tooltips/UI-Tooltip-Background",
     edgeFile = "Interface/Tooltips/UI-Tooltip-Border",
     edgeSize = 16,
     insets = { left = 4, right = 4, top = 4, bottom = 4 },
   })
-  --container:SetBackdropColor(0, 0, 0, 0)
   container:SetBackdropBorderColor(0.4, 1, 0.4, 0)
   container:SetHeight(50)
   container:SetClampedToScreen(true) 
@@ -212,7 +210,7 @@ function locaDebuffs:OnInitialize(db)
     debuff.name = name
     debuff.icon = spellicon
 
-    icons[name] = debuff
+    initializedDebuffs[name] = debuff
   end
 
   iconFrame = locaDebuffs:CreateIcon()
@@ -238,7 +236,6 @@ function locaDebuffs:CreateIcon(debuff)
   cd:SetSwipeColor(0.17, 0, 0, 0.8)
   cd:SetEdgeTexture("Interface\\Cooldown\\edge-LoC.blp")
   cd:SetHideCountdownNumbers(true)
-  --cd:Hide()
 
   local texture = btn:CreateTexture(nil, "ARTWORK")
   texture:SetAllPoints(true)

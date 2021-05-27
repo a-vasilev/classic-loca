@@ -231,7 +231,7 @@ function locaDebuffs:CreateIcon(debuff)
   cd.noomnicc = true
   cd.noCooldownCount = true
   cd:SetAllPoints(true)
-  cd:SetFrameStrata("HIGH")
+  cd:SetFrameStrata("LOW")
   cd:SetUseCircularEdge(true)
   cd:SetSwipeColor(0.17, 0, 0, 0.8)
   cd:SetEdgeTexture("Interface\\Cooldown\\edge-LoC.blp")

@@ -3,6 +3,7 @@ v1.2
 - Adding seconds label
 - Adding a test alert button
 - Fixing a bug where the alert was not updated when a new debuff has been reapplied
+- Fixing a bug where deleting a default debuff caused an error
 
 v1.1
 

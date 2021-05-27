@@ -217,12 +217,23 @@ function locaDebuffs:OnInitialize(db)
 
   locaDebuffs:CreateContainerFrame()
 
-  for _, debuff in ipairs(locaDebuffs.db.debuffsTable) do
+  local staleDebuffs = {}
+
+  for index, debuff in ipairs(locaDebuffs.db.debuffsTable) do
     local name, _, spellicon = GetSpellInfo(debuff.spellId)
     debuff.name = name
     debuff.icon = spellicon
 
-    initializedDebuffs[name] = debuff
+    if name then
+      initializedDebuffs[name] = debuff
+    else
+      table.insert(staleDebuffs, index)
+    end
+  end
+
+  -- remove any old debuff configuration, that is unusable
+  for _, indexToRemove in ipairs(staleDebuffs) do
+    locaDebuffs.db.debuffsTable[indexToRemove] = nil
   end
 
   iconFrame = locaDebuffs:CreateIcon()

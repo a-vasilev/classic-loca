@@ -64,6 +64,8 @@ locaDebuffs.options = {
 local initializedDebuffs = {}
 local iconFrame
 
+local TIME_COMPARISON_THRESHOLD = 0.1
+
 function locaDebuffs:OnDebuffsChanged()
   local candidatesForActivation = {}
   local candidateDurations = {}
@@ -82,7 +84,7 @@ function locaDebuffs:OnDebuffsChanged()
       table.insert(candidateDurations, durationLeft)
     end
   end
-
+  
   local maxDuration = -1
   local targetIndex = 0
   local maxWeight = 1
@@ -358,8 +360,7 @@ function locaDebuffs:ActivateNewDebuff(newDebuff, durationLeft)
   end
 
   if iconFrame.active then
-    if iconFrame.spellId == newDebuff.spellId then
-      -- TODO: do we need to update the time left?
+    if iconFrame.spellId == newDebuff.spellId and math.abs(iconFrame.timeLeft - durationLeft) < TIME_COMPARISON_THRESHOLD  then
       return
     end
     locaDebuffs:DeactivateDebuff()

@@ -1,11 +1,13 @@
 v1.2
 
-Adding seconds label
+- Adding seconds label
+- Fixing a bug where the alert was not updated when a new debuff has been reapplied
+
 
 v1.1
 
-Fixed the cooldown frame appearing over other regular panels
+- Fixed the cooldown frame appearing over other regular panels
 
 v1.0
 
-Initial release
+- Initial release

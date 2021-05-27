@@ -22,13 +22,23 @@ locaDebuffs.options = {
       end,
       width = 0.5
     },
-    break1 = {
+    test = {
       order = 2,
+      name = "Test",
+      type = "execute",
+      desc = "Shows a fake alert for testing the look",
+      func = function()
+        locaDebuffs:RunTest()
+      end,
+      width = 0.5
+    },
+    break1 = {
+      order = 3,
       type = "header",
       name = ""
     },
     scale = {
-      order = 3,
+      order = 4,
       name = "Scale",
       type = "range",
       min = 0.1,
@@ -39,7 +49,7 @@ locaDebuffs.options = {
       set = function(info, val) locaDebuffs:SetScale(info, val) end
     },
     alpha = {
-      order = 4,
+      order = 5,
       name = "Alpha",
       type = "range",
       min = 0.1,
@@ -50,7 +60,7 @@ locaDebuffs.options = {
       set = function(info, val) locaDebuffs:SetAlpha(info, val) end
     },
     debuffList = {
-      order = 5,
+      order = 6,
       type = "group",
       name = "Tracked debuffs",
       childGroups = "select",
@@ -84,7 +94,7 @@ function locaDebuffs:OnDebuffsChanged()
       table.insert(candidateDurations, durationLeft)
     end
   end
-  
+
   local maxDuration = -1
   local targetIndex = 0
   local maxWeight = 1
@@ -382,6 +392,20 @@ function locaDebuffs:OnUpdateTimer(self)
   else
     self.settimeleft(cooldown)
   end
+end
+
+function locaDebuffs:RunTest()
+  local name, _, spellicon = GetSpellInfo(8643)
+
+  local testDebuff = {
+    spellId = 8643,
+    name = name,
+    icon = spellicon,
+    weight = 3,
+    category = "Stunned"
+  }
+
+  locaDebuffs:ActivateNewDebuff(testDebuff, 5.9)
 end
 
 function locaDebuffs:Unlock()

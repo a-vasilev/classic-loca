@@ -270,7 +270,14 @@ function locaDebuffs:CreateIcon(debuff)
   text:SetTextColor(1, 1, 1, 1)
   text:SetPoint("LEFT", btn, "RIGHT", 6, -10)
 
+  local secondsText = btn:CreateFontString(nil, "ARTWORK")
+  secondsText:SetFont(STANDARD_TEXT_FONT, 14, "OUTLINE")
+  secondsText:SetTextColor(1, 1, 1, 1)
+  secondsText:SetPoint("LEFT", btn, "RIGHT", 36, -10)
+  secondsText:SetText("seconds")
+
   btn.text = text
+  btn.secondsText = secondsText
   btn.textureIcon = texture
   btn.cd = cd
   btn.redLineBottom = redLineBottom
@@ -301,6 +308,8 @@ function locaDebuffs:CreateIcon(debuff)
     btn.settimeleft(timeLeft)
     btn:SetScript("OnUpdate", function(self) locaDebuffs:OnUpdateTimer(self) end)
     btn.active = true
+
+    btn.secondsText:SetPoint("LEFT", btn, "RIGHT", 6 + btn.text:GetStringWidth(), -10)
   end
 
   -- called to hide stop the frame

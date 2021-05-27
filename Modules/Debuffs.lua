@@ -35,7 +35,7 @@ locaDebuffs.options = {
     break1 = {
       order = 3,
       type = "header",
-      name = ""
+      name = "Visuals"
     },
     scale = {
       order = 4,
@@ -59,8 +59,37 @@ locaDebuffs.options = {
       get = function(info) return locaDebuffs:GetAlpha(info) end,
       set = function(info, val) locaDebuffs:SetAlpha(info, val) end
     },
-    debuffList = {
+    break2 = {
       order = 6,
+      type = "header",
+      name = ""
+    },
+    showRedLines = {
+      order = 7,
+      type = "toggle",
+      name = "Show Red Lines",
+      width = "full",
+      get = function(info) return locaDebuffs.db.showRedLines end,
+      set = function(info, val) locaDebuffs:SetShowRedLines(val) end,
+    },
+    showBackground = {
+      order = 8,
+      type = "toggle",
+      name = "Show Background",
+      width = "full",
+      get = function(info) return locaDebuffs.db.showBackground end,
+      set = function(info, val) locaDebuffs:SetShowBackground(val) end,
+    },
+    showSecondsLabel = {
+      order = 9,
+      type = "toggle",
+      name = "Show Seconds Label",
+      width = "full",
+      get = function(info) return locaDebuffs.db.showSecondsLabel end,
+      set = function(info, val) locaDebuffs:SetShowSecondsLabel(val) end,
+    },
+    debuffList = {
+      order = 10,
       type = "group",
       name = "Tracked debuffs",
       childGroups = "select",
@@ -209,6 +238,26 @@ end
 function locaDebuffs:UpdateContainer()
   container:SetScale(locaDebuffs.db.scale)
   container:SetAlpha(locaDebuffs.db.alpha)
+
+  if locaDebuffs.db.showSecondsLabel then
+    iconFrame.secondsText:Show()
+  else
+    iconFrame.secondsText:Hide()
+  end
+  
+  if locaDebuffs.db.showRedLines then
+    iconFrame.redLineTop:Show()
+    iconFrame.redLineBottom:Show()
+  else
+    iconFrame.redLineTop:Hide()
+    iconFrame.redLineBottom:Hide()
+  end
+
+  if locaDebuffs.db.showBackground then
+    iconFrame.backgroundTexture:Show()
+  else
+    iconFrame.backgroundTexture:Hide()
+  end
 end
 
 function locaDebuffs:OnInitialize(db)
@@ -279,7 +328,7 @@ function locaDebuffs:CreateIcon(debuff)
   local redLineBottom = btn:CreateTexture(nil, "BACKGROUND")
   redLineBottom:SetTexture("Interface\\Cooldown\\Loc-RedLine")
   redLineBottom:SetWidth(160)
-  redLineBottom:SetHeight(20)
+  redLineBottom:SetHeight(27)
   redLineBottom:SetTexCoord(0, 1, 1, 0)
   redLineBottom:SetPoint("TOP", container, "BOTTOM", 0, 0)
 
@@ -306,6 +355,7 @@ function locaDebuffs:CreateIcon(debuff)
   btn.redLineBottom = redLineBottom
   btn.redLineTop = redLineTop
   btn.debuffTitle = debuffTitle
+  btn.backgroundTexture = backgroundTexture
 
   btn.spellId = 0
   btn.name = ""
@@ -349,15 +399,7 @@ function locaDebuffs:CreateIcon(debuff)
   btn.settimeleft = function(timeleft)
     btn.timeLeft = timeleft
 
-    if timeleft < 10 then
-      if timeleft <= 0.5 then
-        btn.text:SetText("")
-      else
-        btn.text:SetFormattedText("%.1f", timeleft)
-      end
-    else
-      btn.text:SetFormattedText("%.1f", timeleft)
-    end
+    btn.text:SetFormattedText("%.1f", timeleft)
 
     -- set smaller font if the time left is too big, so it can fit in the icon
     if timeleft > 60 then
@@ -454,6 +496,24 @@ end
 function locaDebuffs:OnUpdateSettings()
   locaDebuffs:LoadPosition()
 
+  locaDebuffs:UpdateContainer()
+end
+
+function locaDebuffs:SetShowRedLines(val)
+  locaDebuffs.db.showRedLines = val
+
+  locaDebuffs:UpdateContainer()
+end
+
+function locaDebuffs:SetShowSecondsLabel(val)
+  locaDebuffs.db.showSecondsLabel = val
+  
+  locaDebuffs:UpdateContainer()
+end
+
+function locaDebuffs:SetShowBackground(val)
+  locaDebuffs.db.showBackground = val
+  
   locaDebuffs:UpdateContainer()
 end
 

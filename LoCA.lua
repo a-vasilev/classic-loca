@@ -8,6 +8,9 @@ addon.defaultSettings = {
       mode = "retail", --[[ custom/retail --]]
       scale = 1,
       alpha = 1,
+      showRedLines = true,
+      showBackground = true,
+      showSecondsLabel = true,
       debuffsTable = {
         { spellId = 122, category = "Snared", weight = 1, active = true },     --[[ Frost Nova --]]
         { spellId = 12494, category = "Snared", weight = 1, active = true },   --[[ Frostbite --]]

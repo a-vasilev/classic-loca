@@ -1,3 +1,8 @@
+v1.3
+
+- Adding configuration to disable alerts from specific categories.
+- Fixing a bug where roots wouldn't be displayed in retail mode
+
 v1.2
 
 - Adding seconds label

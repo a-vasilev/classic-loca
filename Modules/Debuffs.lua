@@ -4,6 +4,22 @@ local locaDebuffs = addon.CreateDebuffs()
 local container
 local isLocked = true
 
+local LOC_TYPE_MAP = {
+  ROOT = 1,
+  SCHOOL_INTERRUPT = 2,
+  DISARM = 2,
+  PACIFYSILENCE = 2,
+  SILENCE = 2,
+  STUN_MECHANIC = 3,
+  PACIFY = 3,
+  STUN = 4,
+  FEAR = 4,
+  FEAR_MECHANIC = 4,
+  CHARM = 4,
+  CONFUSE = 4,
+  POSSESS = 4,
+}
+
 locaDebuffs.options = {
   type = "group",
   name = "Debuffs",
@@ -88,10 +104,61 @@ locaDebuffs.options = {
       get = function(info) return locaDebuffs.db.showSecondsLabel end,
       set = function(info, val) locaDebuffs:SetShowSecondsLabel(val) end,
     },
-    debuffList = {
+    debuffCategories = {
       order = 10,
       type = "group",
-      name = "Tracked debuffs",
+      name = "Tracked Categories",
+      childGroups = "select",
+      args = {
+        header = {
+          order = 1,
+          type = "header",
+          name = "Tracked Categories"
+        },
+        description = {
+          order = 2,
+          type = "description",
+          name = "Enable/disable whole categories from being showed"
+        },
+        break1 = {
+          order = 3,
+          type = "header",
+          name = ""
+        },
+        root = {
+          order = 4,
+          type = "toggle",
+          name = "Movement/Root",
+          get = function(info) return locaDebuffs.db.types[1].active end,
+          set = function(info, val) locaDebuffs.db.types[1].active = val end
+        },
+        silence = {
+          order = 5,
+          type = "toggle",
+          name = "Silence/Disarm",
+          get = function(info) return locaDebuffs.db.types[2].active end,
+          set = function(info, val) locaDebuffs.db.types[2].active = val end
+        },
+        stun = {
+          order = 6,
+          type = "toggle",
+          name = "Stun",
+          get = function(info) return locaDebuffs.db.types[3].active end,
+          set = function(info, val) locaDebuffs.db.types[3].active = val end
+        },
+        full = {
+          order = 7,
+          type = "toggle",
+          name = "Full",
+          get = function(info) return locaDebuffs.db.types[4].active end,
+          set = function(info, val) locaDebuffs.db.types[4].active = val end
+        }
+      }
+    },
+    debuffList = {
+      order = 11,
+      type = "group",
+      name = "Tracked Debuffs",
       childGroups = "select",
       hidden = function() return locaDebuffs.db.mode ~= "custom" end,
       disabled = function() return locaDebuffs.db.mode ~= "custom" end,
@@ -160,9 +227,9 @@ function locaDebuffs:OnLossOfControlEvent(locData, eventIndex)
   local priority = locData.priority;
   local displayType = locData.displayType;
 
-  if ( text and displayType ~= 0 ) then
-    if ( locType == "SCHOOL_INTERRUPT" ) then
-      if(lockoutSchool and lockoutSchool ~= 0) then
+  if text then
+    if locType == "SCHOOL_INTERRUPT" then
+      if lockoutSchool and lockoutSchool ~= 0 then
         text = string.format("%s Locked", GetSchoolString(lockoutSchool));
       end
     end
@@ -173,8 +240,14 @@ function locaDebuffs:OnLossOfControlEvent(locData, eventIndex)
       name = text,
       icon = iconTexture,
       weight = priority,
-      category = text
+      category = text,
+      type = LOC_TYPE_MAP[locType]
     }
+
+    -- in case that there's a missed loctype just use the highest one
+    if not debuffConfiguration.type then
+      debuffConfiguration.type = 4
+    end
 
     if not iconFrame.active or debuffConfiguration.weight > iconFrame.weight then
       locaDebuffs:ActivateNewDebuff(debuffConfiguration, timeRemaining)
@@ -185,7 +258,7 @@ function locaDebuffs:OnLossOfControlEvent(locData, eventIndex)
 end
 
 function locaDebuffs:OnLossOfControlUpdate(locData)
-  if locData and locData.displayType ~= 0 then
+  if locData then
     if iconFrame.active and locData.spellID ~= iconFrame.spellId then
       locaDebuffs:DeactivateDebuff()
     end
@@ -422,6 +495,8 @@ function locaDebuffs:ActivateNewDebuff(newDebuff, durationLeft)
     return
   end
 
+  if not locaDebuffs.db.types[newDebuff.type].active then return end
+
   if iconFrame.active then
     if iconFrame.spellId == newDebuff.spellId and math.abs(iconFrame.timeLeft - durationLeft) < TIME_COMPARISON_THRESHOLD  then
       return
@@ -455,7 +530,8 @@ function locaDebuffs:RunTest()
     name = name,
     icon = spellicon,
     weight = 3,
-    category = "Stunned"
+    category = "Stunned",
+    type = 3
   }
 
   locaDebuffs:ActivateNewDebuff(testDebuff, 5.9)
@@ -549,7 +625,7 @@ function locaDebuffs:CreateDebuffUIList()
           name = "Weight",
           desc = "Higher weighted alerts overwrite lower ones",
           values = {
-            [1] = "1 - Movement",
+            [1] = "1 - Movement/Root",
             [2] = "2 - Disarm/Silence",
             [3] = "3 - Stun",
             [4] = "4 - Full",

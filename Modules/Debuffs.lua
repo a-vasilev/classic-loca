@@ -441,21 +441,29 @@ function locaDebuffs:CreateIcon(debuff)
     btn.spellId = debuff.spellId
     btn.name = debuff.name
     btn.weight = debuff.weight
+    btn.active = true
 
     btn.textureIcon:SetTexture(debuff.icon)
     btn.debuffTitle:SetText(debuff.category)
     
     container:SetBackdropColor(0, 0, 0, 0.4)
     btn:Show()
-    btn.start = GetTime()
-    btn.duration = timeLeft
-    btn.cd:Show()
-    btn.cd:SetCooldown(GetTime(), timeLeft)
-    btn.settimeleft(timeLeft)
-    btn:SetScript("OnUpdate", function(self) locaDebuffs:OnUpdateTimer(self) end)
-    btn.active = true
+    if timeLeft then
+      btn.cd:Show()
+      btn.cd:SetCooldown(GetTime(), timeLeft)
+      btn.text:Show()
+      btn.start = GetTime()
+      btn.duration = timeLeft
+      btn.settimeleft(timeLeft)
+      btn:SetScript("OnUpdate", function(self) locaDebuffs:OnUpdateTimer(self) end)
 
-    btn.secondsText:SetPoint("LEFT", btn, "RIGHT", 6 + btn.text:GetStringWidth(), -10)
+      btn.secondsText:SetPoint("LEFT", btn, "RIGHT", 6 + btn.text:GetStringWidth(), -10)
+      btn.secondsText:Show()
+    else
+      btn.cd:Hide()
+      btn.text:Hide()
+      btn.secondsText:Hide()
+    end
   end
 
   -- called to hide stop the frame
@@ -471,7 +479,7 @@ function locaDebuffs:CreateIcon(debuff)
 
   btn.settimeleft = function(timeleft)
     btn.timeLeft = timeleft
-
+    btn.text:Show()
     btn.text:SetFormattedText("%.1f", timeleft)
 
     -- set smaller font if the time left is too big, so it can fit in the icon
@@ -498,7 +506,7 @@ function locaDebuffs:ActivateNewDebuff(newDebuff, durationLeft)
   if not locaDebuffs.db.types[newDebuff.type].active then return end
 
   if iconFrame.active then
-    if iconFrame.spellId == newDebuff.spellId and math.abs(iconFrame.timeLeft - durationLeft) < TIME_COMPARISON_THRESHOLD  then
+    if iconFrame.spellId == newDebuff.spellId and math.abs(iconFrame.timeLeft - durationLeft) < TIME_COMPARISON_THRESHOLD then
       return
     end
     locaDebuffs:DeactivateDebuff()
@@ -534,7 +542,7 @@ function locaDebuffs:RunTest()
     type = 3
   }
 
-  locaDebuffs:ActivateNewDebuff(testDebuff, 5.9)
+  locaDebuffs:ActivateNewDebuff(testDebuff, nil)
 end
 
 function locaDebuffs:Unlock()

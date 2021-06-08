@@ -251,7 +251,7 @@ function locaDebuffs:OnLossOfControlEvent(locData, eventIndex)
 
     if not iconFrame.active or debuffConfiguration.weight > iconFrame.weight then
       locaDebuffs:ActivateNewDebuff(debuffConfiguration, timeRemaining)
-    elseif iconFrame.active and debuffConfiguration.weight == iconFrame.weight and timeRemaining > iconFrame.timeLeft then
+    elseif iconFrame.active and debuffConfiguration.weight == iconFrame.weight and (timeRemaining == nil or timeRemaining > iconFrame.timeLeft) then
       locaDebuffs:ActivateNewDebuff(debuffConfiguration, timeRemaining)
     end
   end
@@ -542,7 +542,7 @@ function locaDebuffs:RunTest()
     type = 3
   }
 
-  locaDebuffs:ActivateNewDebuff(testDebuff, nil)
+  locaDebuffs:ActivateNewDebuff(testDebuff, 5.9)
 end
 
 function locaDebuffs:Unlock()

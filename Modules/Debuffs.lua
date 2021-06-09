@@ -506,6 +506,7 @@ function locaDebuffs:ActivateNewDebuff(newDebuff, durationLeft)
   if not locaDebuffs.db.types[newDebuff.type].active then return end
 
   if iconFrame.active then
+    -- if the spell has the same time remaining or no duration, there's no need to update it
     if iconFrame.spellId == newDebuff.spellId and (not iconFrame.timeLeft or not durationLeft or math.abs(iconFrame.timeLeft - durationLeft) < TIME_COMPARISON_THRESHOLD) then
       return
     end

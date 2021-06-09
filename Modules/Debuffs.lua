@@ -506,7 +506,7 @@ function locaDebuffs:ActivateNewDebuff(newDebuff, durationLeft)
   if not locaDebuffs.db.types[newDebuff.type].active then return end
 
   if iconFrame.active then
-    if iconFrame.spellId == newDebuff.spellId and math.abs(iconFrame.timeLeft - durationLeft) < TIME_COMPARISON_THRESHOLD then
+    if iconFrame.spellId == newDebuff.spellId and (not iconFrame.timeLeft or not durationLeft or math.abs(iconFrame.timeLeft - durationLeft) < TIME_COMPARISON_THRESHOLD) then
       return
     end
     locaDebuffs:DeactivateDebuff()

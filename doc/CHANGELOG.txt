@@ -1,3 +1,7 @@
+v1.7
+
+- Removing initalization chat message
+
 v1.6
 
 - Fixing a bug when a LoC effect without duration gets reapplied

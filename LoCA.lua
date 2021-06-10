@@ -141,8 +141,6 @@ function addon:OnInitialize()
   addon.db.RegisterCallback(addon, "OnProfileChanged", UpdateProfileRefs)
   addon.db.RegisterCallback(addon, "OnProfileCopied", UpdateProfileRefs)
   addon.db.RegisterCallback(addon, "OnProfileReset", UpdateProfileRefs)
-
-  print("Initialized " .. addon.addonTitle)
 end
 
 function addon:OnEvent(event, ...)

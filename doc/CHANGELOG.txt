@@ -1,3 +1,7 @@
+v1.8
+
+- Updating to latest patch
+
 v1.7
 
 - Removing initalization chat message

@@ -30,6 +30,7 @@ addon.defaultSettings = {
         { spellId = 34490, category = "Silenced", weight = 2, active = true, type = 2 }, --[[ Silencing Shot --]]
         { spellId = 1330, category = "Silenced", weight = 2, active = true, type = 2 },  --[[ Garrote --]]
         { spellId = 19647, category = "Silenced", weight = 2, active = true, type = 2 }, --[[ Spell Lock --]]
+        { spellId = 32053, category = "Silenced", weight = 2, active = true, type = 2 }, --[[ Archimonde Soul Charge ]]
         { spellId = 676, category = "Disarmed", weight = 2, active = true, type = 2 },   --[[ Disarm --]]
 
         { spellId = 8643, category = "Stunned", weight = 3, active = true, type = 3 },   --[[ Kidney Shot --]]

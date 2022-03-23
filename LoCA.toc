@@ -1,7 +1,7 @@
-## Interface: 20503
+## Interface: 20504
 ## Title: Loss of Control Alerter
 ## Notes: Shows alerts on loss of control debuffs
-## Version: 1.9
+## Version: 1.10
 ## Author: Rdmx
 ## DefaultState: Enabled
 ## SavedVariables: LoCADB

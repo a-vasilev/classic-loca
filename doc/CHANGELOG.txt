@@ -1,3 +1,7 @@
+v1.12
+
+- Updating to Wotlk Classic
+
 v1.11
 
 - Updating to the latest patch

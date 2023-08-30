@@ -150,7 +150,12 @@ function addon:OnEvent(event, ...)
     addon:OnAuraEvent(...)
   elseif event == "LOSS_OF_CONTROL_ADDED" then
     if addon.db.profile.debuffs.mode == "retail" then
-      local eventIndex = ...
+      -- There exists 2 versions paylods for LOSS_OF_CONTROL_ADDED:
+      -- - either eventIndex only
+      -- - or unitTarget first, then eventIndex
+      -- We use a simple hack to support both flavors at the same time
+      local eventIndexOrUnit, eventIndexOrNothing = ...
+      local eventIndex = eventIndexOrNothing or eventIndexOrUnit -- The magic is here
       local data = C_LossOfControl.GetActiveLossOfControlData(eventIndex)
       debuffs:OnLossOfControlEvent(data, eventIndex)
     end
